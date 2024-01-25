@@ -1,0 +1,57 @@
+Version 1.0.14
+--------------
+- Read all set values again in case of an event, which could
+  lead to changed set values
+- Add visual hint to table when current set value is zero
+- SHR: Allow saving changed configurations
+- Support Filament supply devices
+
+Version 1.0.13
+--------------
+
+- Support NHR Limits
+- Official support for HPS H150666 and SHR
+- Some communication improvements regarding connection timeouts
+
+Version 1.0.12
+--------------
+
+- Allow changing the voltage set value in small steps with Plus and
+  Minus keys
+- Support NHR devices
+
+Version 1.0.11
+--------------
+
+- Support "listen only" operation for HPS devices
+- Statistic: Allow logging of status/event registers
+
+Version 1.0.10
+--------------
+
+- Fix Limit display for HPS, NHS and MICC devices
+- Fix Ramp speed input for HPS devices
+- Fix Statistic function with delay interval
+- Fix coloring of status bits Arc and Arc-Error
+- Turned on channels with Voltage set = 0 now
+  show status "On" in yellow color
+- Display the internal supplies -12V and +12V also
+
+Version 1.0.9
+-------------
+
+- Show connection address in the status bar
+- Allow setting negative Vset for channels with negative Vnominal
+- Support for the bit ModuleStatus.isHighVoltageOn
+
+Version 1.0.8
+-------------
+
+- First implementation of statistic function
+
+Version 1.0.7
+-------------
+
+- Support for MICC with Firmware > 4.0
+- Support for FTDI USB-Serial adaptors with Read-timeout 1 millsecond
+- Fix displaying voltage and current ramp for MICC and NHS
