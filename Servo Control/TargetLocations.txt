@@ -1,5 +1,3 @@
-Target 1, 100
-Target 2, 90
-Target 3, 95
-Target 4, 85
-Target 5, 76
+Target 1, 0
+Target 2, 50
+Target 3, 100
