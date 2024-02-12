@@ -18,8 +18,8 @@ import numpy as np
 
 rm = pyvisa.ResourceManager()
 
-colCh = 0 #colimator channel
-targCh = 1 # target channel
+colCh = "0" #colimator channel
+targCh = "1" # target channel
 
 ################################################
 #To configure the click shell layout
@@ -58,44 +58,34 @@ with rm.open_resource(name) as nhs:
         pass
 
     
+    def scientific(string):
+        return float(string.replace("E", "e")[:-1])
+
     def measureV():
         #col then targ
        
-        
-        command = (':MEAS:VOLT?(@%s)' %  colCh)
+        command = (':MEAS:VOLT? (@%s)' %  colCh)
         nhs.query(command)
-        time.sleep(.1)
-        voltcol = nhs.read().strip()[0:7]
+        voltcol = nhs.read().strip()
         
         command = (':MEAS:VOLT? (@%s)' %  targCh)
         nhs.query(command)
-        time.sleep(.1)
-        volttarg = nhs.read().strip()[0:7]
-        
-      
-        
-        
-       
-        
-        return (float(voltcol)*1000, float(volttarg)*1000)
+        volttarg = nhs.read().strip()
+
+        return scientific(voltcol), scientific(volttarg)
     
     def measureA():
         
-      
         command = (':MEAS:CURR?(@%s)' %  colCh)
         nhs.query(command)
-        time.sleep(.1)
-        currcol = nhs.read().strip()[0:7]
+        currcol = nhs.read().strip()
         
         command = (':MEAS:CURR? (@%s)' %  targCh)
         nhs.query(command)
-        time.sleep(.1)
-        currtarg = nhs.read().strip()[0:7]
-        
-        
-        
-        
-        return currcol, currtarg
+        currtarg = nhs.read().strip()
+
+
+        return scientific(currcol), scientific(currtarg)
     
     
     
@@ -108,14 +98,14 @@ with rm.open_resource(name) as nhs:
        
        command = (':READ:VOLT? (@%s)' %  colCh)
        nhs.query(command)
-       voltcol = nhs.read().strip()[0:7]
+       voltcol = nhs.read().strip()
       
        command = (':READ:VOLT? (@%s)' %  targCh)
        nhs.query(command)
-       volttarg = nhs.read().strip()[0:7]
+       volttarg = nhs.read().strip()
+
        
-       
-       return (float(voltcol)*1000, float(volttarg)*1000)
+       return scientific(voltcol), scientific(volttarg)
 
 
 
@@ -126,7 +116,7 @@ with rm.open_resource(name) as nhs:
         """Displays voltage and current of both channels"""
         if d < 666:
             print(d)
-            Dino()
+            #Dino()
             
         print('ColV:', round(measureV()[0],3) ,'V,', 'ColA:', round(float(measureA()[0]),4) ,'A')
         print('TargV:', round(measureV()[1],3) ,'V,', 'TargA:', round(float(measureA()[1]),4) ,'A')
@@ -138,8 +128,8 @@ with rm.open_resource(name) as nhs:
         """Displays what voltage channels are set to"""
         print('SET VOLTAGES:')
         volt1, volt2 = readV()
-        print('Collimator:   ', volt1)
-        print('Target:       ', volt2)
+        print('Collimator:   ', volt1, "V")
+        print('Target:       ', volt2, "V")
         
     
         
@@ -162,9 +152,29 @@ with rm.open_resource(name) as nhs:
         nhs.write(':VOLT %s,(@%s)' % (volt, colCh))
         nhs.read()
         
-   
-            
-    
+    @my_app.command()
+    def turnOn():#turn the channels on
+        """Turns on the voltage supply channels'"""
+        print('ALL CHANNELS ARE ON')
+        nhs.write(':VOLT ON, (@%s)' % (colCh))
+        nhs.read()
+        nhs.write(':VOLT ON, (@%s)' % (targCh))
+        nhs.read()
+
+
+
+
+    @my_app.command()
+    def turnOff():#turn the channels off
+        """Turns off the voltage supply channels'"""
+        print('ALL CHANNELS ARE OFF')
+        nhs.write(':VOLT OFF, (@%s)' % (colCh))
+        nhs.read()
+        nhs.write(':VOLT OFF, (@%s)' % (targCh))
+        nhs.read()
+
+
+
     def log(stopEvent, openEvent, *arg):
         print('Thread started...')
         
@@ -172,39 +182,33 @@ with rm.open_resource(name) as nhs:
         ###Incimenting file system!
         
         today = datetime.datetime.today().strftime('%m-%d-%Y')
+        hour = datetime.datetime.now().strftime("%H_%M")
         i = 0
-        while os.path.exists("Logs/Run%s-%s.txt" % (i,today)):
+        while os.path.exists("Logs/Run%s-%s.txt" % (today,hour)):
             i += 1
         
-        name = "Logs/Run%s-%s.txt" % (i,today)
-        print(name)
+        name = "Logs/Run_%s-%s.txt" % (today,hour)
         f = open(name, "a")
-        f.write('Target V, Target C, Colimator V, Collimator C, Time \n')
+        columnName = ["Target_V", "Target_C", "Colimator_V", "Colimator_C", "Time"]
+        f.write("{0[0]:<12}{0[1]:<12}{0[2]:<12}{0[3]:<12}{0[4]:<12} \n".format(columnName))
         
         while True:
             
             time.sleep(int(logTime))
-            #print('Logging')
-            
-            #print(openEvent.is_set(), 's')
+
             openEvent.wait()
             #print('s in ')
             openEvent.clear()
             
-           # print(openEvent.is_set(), 's2')
             #### Write loop code here
             c = datetime.datetime.now()
             
             V = measureV()
-            #print(V, 'VV')
             C = measureA()
             t = c.strftime('%H:%M:%S')
             
-            f.write('{0},{1},{2},{3},{4} \n'.format(V[1],C[1],V[0],C[0], t))
-           # print('{0},{1},{2},{3},{4} \n'.format(V[1],C[1],V[0],C[0], t))
+            f.write('{0:<12}{1:<12}{2:<12}{3:<12}{4:<12} \n'.format(round(V[1],2),round(C[1],2),round(V[0],2),round(C[0],2), t))
             openEvent.set()
-            ####
-            #print('s out ')
             if stopEvent.is_set():#Exit event
                 
                 f.close()
@@ -217,11 +221,11 @@ with rm.open_resource(name) as nhs:
     @click.argument('stepvolt', required=1)
     @click.argument('mintvolt', required=1)
     @click.argument('maxtvolt', required=1)
-    @click.argument('gap', required=1)
+    @click.argument('gap', default = 300)
     def runStep(stepvolt,mintvolt, maxtvolt, gap):
         """
         Performs a full scan of voltages in steps of 'stepvolt',from a min Target voltage 'mintvolt, to a maximum voltage 'maxvolt', with a voltage gap between the two channels of 'gap'.
-        While running, a log is produced t
+        While running, a log is produced t 
         
         Example: \n
             'runstep 100 300 600 300' - This will run through these values for the target and collimator repectivly: \n
@@ -313,8 +317,8 @@ with rm.open_resource(name) as nhs:
         time.sleep(1)
         
         nhs.write(':VOLT %s,(@%s)' % (0, targCh))
-        nhs.write(':VOLT %s,(@%s)' % (0, colCh))
         nhs.read()
+        nhs.write(':VOLT %s,(@%s)' % (0, colCh))
         nhs.read()
         
         time.sleep(1)
