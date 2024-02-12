@@ -66,7 +66,7 @@ with serial.Serial(port) as ser:#CHANGE PORT WHEN NEEDED
         nspins = float(nspins)
         totalSpins = readLoc() + nspins
         
-        updateLoc(totalSpins)
+        updateLoc(totalSpins, totalSpins*0.625 )
         ###Checking for negative
         if nspins > 0:
             commandBase = [b'\xFA', b'\x01',b'\xFD',b'\x80',b'\x70',b'\x07'] #Forwards direction
@@ -130,7 +130,7 @@ with serial.Serial(port) as ser:#CHANGE PORT WHEN NEEDED
         """
        # n = float(n)
         
-        #.01 turns = 0.00635mm
+        #.01 turns = 0.00625mm
         #.01 turns = 0.00025 inch
         #1 inch = 40 turns
         
@@ -140,16 +140,16 @@ with serial.Serial(port) as ser:#CHANGE PORT WHEN NEEDED
         
         
         
-    def updateLoc(x):
+    def updateLoc(x,y):
         #Rewrites the current locations
-        np.savetxt('currentLoc.txt', [x])
+        np.savetxt('currentLoc.txt', [[x],[y]])
         return
      
         
      
     def readLoc():
         #reads the current location
-        x = np.loadtxt('currentLoc.txt')
+        x = np.loadtxt('currentLoc.txt')[0]
         return float(x)
      
         
@@ -184,7 +184,7 @@ with serial.Serial(port) as ser:#CHANGE PORT WHEN NEEDED
         print('Initiating reset, moving to position zero..')
         print('Please wait 60 seconds...')
         spinToZero()
-        updateLoc(0)
+        updateLoc(0,0)
         print('...Done')
         
         
