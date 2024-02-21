@@ -35,7 +35,6 @@ name, baud, logTime = settings
 
 
 with rm.open_resource(name) as nhs:
-   
     
     nhs.timeout = 4000
     nhs.write_termination = '\n'
@@ -44,17 +43,21 @@ with rm.open_resource(name) as nhs:
     
     global logStop 
     logStop = True
+
+    nhs.write(':VOLT ON, (@%s)' % (colCh))
+    nhs.read()
+    nhs.write(':VOLT ON, (@%s)' % (targCh))
+    nhs.read()
     
     nhs.write(':VOLT %s,(@%s)' % (0, targCh))
     nhs.read()
-    
+
     nhs.write(':VOLT %s,(@%s)' % (0, colCh))
     nhs.read()
     
     
     @shell(prompt= 'High Voltage >', intro="Voltages being set to zero, type 'help' for a list of commands" )
     def my_app():
-
         pass
 
     
@@ -87,10 +90,7 @@ with rm.open_resource(name) as nhs:
 
         return scientific(currcol), scientific(currtarg)
     
-    
-    
         
-    
     def readV():
         
        #col then targ
@@ -191,6 +191,7 @@ with rm.open_resource(name) as nhs:
         f = open(name, "a")
         columnName = ["Target_V", "Target_C", "Colimator_V", "Colimator_C", "Time"]
         f.write("{0[0]:<12}{0[1]:<12}{0[2]:<12}{0[3]:<12}{0[4]:<12} \n".format(columnName))
+        f.flush()
         
         while True:
             
@@ -208,6 +209,7 @@ with rm.open_resource(name) as nhs:
             t = c.strftime('%H:%M:%S')
             
             f.write('{0:<12}{1:<12}{2:<12}{3:<12}{4:<12} \n'.format(round(V[1],2),round(C[1],2),round(V[0],2),round(C[0],2), t))
+            f.flush()
             openEvent.set()
             if stopEvent.is_set():#Exit event
                 
@@ -299,9 +301,12 @@ with rm.open_resource(name) as nhs:
                openEvent.clear()
                time.sleep(.7)
                x =  measureV()
+               curr = measureA()
+
                openEvent.set()
              
-               print(round(x[1], 2), round(x[0], 2))
+               print("Collimator voltage: ",round(x[0], 4), "Target current: ", round(curr[1], 10))
+               print("Target voltage: ", round(x[1], 4), "Collimator current: ",round(curr[0], 10))
                if (x[0] > .98*(colVolt- 1) and x[0] < 1.02*(colVolt+1)) and (x[1] > .98*targVolt and x[1] < 1.02*targVolt):
                    confirm = True
                    time.sleep(.2)
