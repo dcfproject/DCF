@@ -118,8 +118,8 @@ with rm.open_resource(name) as nhs:
             print(d)
             #Dino()
             
-        print('ColV:', round(measureV()[0],3) ,'V,', 'ColA:', round(float(measureA()[0]),4) ,'A')
-        print('TargV:', round(measureV()[1],3) ,'V,', 'TargA:', round(float(measureA()[1]),4) ,'A')
+        print('ColV:', round(measureV()[0],4) ,'V,', 'ColA:', round(float(measureA()[0]),10) ,'A')
+        print('TargV:', round(measureV()[1],4) ,'V,', 'TargA:', round(float(measureA()[1]),10) ,'A')
         
         
     
@@ -208,7 +208,7 @@ with rm.open_resource(name) as nhs:
             C = measureA()
             t = c.strftime('%H:%M:%S')
             
-            f.write('{0:<12}{1:<12}{2:<12}{3:<12}{4:<12} \n'.format(round(V[1],2),round(C[1],2),round(V[0],2),round(C[0],2), t))
+            f.write('{0:<12}{1:<12}{2:<12}{3:<12}{4:<12} \n'.format(round(V[1],4),round(C[1],4),round(V[0],10),round(C[0],10), t))
             f.flush()
             openEvent.set()
             if stopEvent.is_set():#Exit event
