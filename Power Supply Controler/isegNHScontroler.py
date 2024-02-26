@@ -174,6 +174,15 @@ with rm.open_resource(name) as nhs:
         nhs.read()
 
 
+    @my_app.command()
+    def reset():#turn the channels off
+        """Turns off the voltage supply channels'"""
+        print('ALL CHANNELS SET TO 0V')
+        nhs.write(':VOLT 0, (@%s)' % (colCh))
+        nhs.read()
+        nhs.write(':VOLT 0, (@%s)' % (targCh))
+        nhs.read()
+
 
     def log(stopEvent, openEvent, *arg):
         print('Thread started...')
@@ -189,8 +198,8 @@ with rm.open_resource(name) as nhs:
         
         name = "Logs/Run_%s-%s.txt" % (today,hour)
         f = open(name, "a")
-        columnName = ["Target_V", "Target_C", "Colimator_V", "Colimator_C", "Time"]
-        f.write("{0[0]:<12}{0[1]:<12}{0[2]:<12}{0[3]:<12}{0[4]:<12} \n".format(columnName))
+        columnName = ["Target_V (V)", "Target_C (A)", "Colimator_V (V)", "Colimator_C (A)", "Time"]
+        f.write("{0[0]:<16}{0[1]:<16}{0[2]:<16}{0[3]:<16}{0[4]:<16} \n".format(columnName))
         f.flush()
         
         while True:
@@ -208,14 +217,14 @@ with rm.open_resource(name) as nhs:
             C = measureA()
             t = c.strftime('%H:%M:%S')
             
-            f.write('{0:<12}{1:<12}{2:<12}{3:<12}{4:<12} \n'.format(round(V[1],4),round(C[1],4),round(V[0],10),round(C[0],10), t))
+            f.write('{0:<16}{1:<16}{2:<16}{3:<16}{4:<16} \n'.format(round(V[1],4),round(C[1],10),round(V[0],4),round(C[0],10), t))
             f.flush()
             openEvent.set()
             if stopEvent.is_set():#Exit event
                 
                 f.close()
                 print('...Thread Ended')
-                break
+                break   
             
         
     
@@ -292,7 +301,7 @@ with rm.open_resource(name) as nhs:
             #print('M out')
             
             print('Target set to {0}V, Collimator set to {1}V...please wait for voltage to ramp'.format(targVolt, colVolt))
-            
+            print("Collimator voltage (V) ", "Collimator current (A) ", "Target voltge (V)", "Target current (A)")
             #wait for confirmation
             confirm = False
             while confirm == False:
@@ -305,9 +314,11 @@ with rm.open_resource(name) as nhs:
 
                openEvent.set()
              
-               print("Collimator voltage: ",round(x[0], 4), "Target current: ", round(curr[1], 10))
-               print("Target voltage: ", round(x[1], 4), "Collimator current: ",round(curr[0], 10))
-               if (x[0] > .98*(colVolt- 1) and x[0] < 1.02*(colVolt+1)) and (x[1] > .98*targVolt and x[1] < 1.02*targVolt):
+               print("{0:<23} {1:<23} {2:<17} {3:<17}".format(round(x[0], 4), round(curr[0], 10), round(x[1], 4), round(curr[1], 10)))
+               if (x[0] > 0 and x[0] < 20 and (x[1] > .98*targVolt and x[1] < 1.02*targVolt)):
+                     confirm = True
+                     time.sleep(.2)
+               elif (x[0] > .98*(colVolt- 1) and x[0] < 1.02*(colVolt+1)) and (x[1] > .98*targVolt and x[1] < 1.02*targVolt):
                    confirm = True
                    time.sleep(.2)
             voltage = voltage + stepvolt
