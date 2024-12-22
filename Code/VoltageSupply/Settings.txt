@@ -1,0 +1,3 @@
+interface, ASRL4::INSTR
+baudrate, 9600
+logTime(s), 1
