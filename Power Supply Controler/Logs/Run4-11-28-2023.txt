@@ -1,1 +1,0 @@
-Target V, Target C, Colimator V, Collimator C, Time 
