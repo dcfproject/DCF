@@ -98,19 +98,3 @@ for log in logList:
             print(errorYield[-1], ((errnorm[0]/pnorm[0])**2 / added), ((integError/integCharge)**2)/added)
         index += 1 
     count += 1
-# f = open("C:/Users/Konrad/Desktop/DCF/DCF/Data/Yield/Yield_binned/Yield_1799_full.txt", "w")
-# for l in range(0,len(totalYield)):
-#     f.write(str(energy[l]) + " " + str(totalYield[l]) + " " + str(errorYield[l]) + " " + str(measurment_run[l])+ "\n")
-# f.close    
-#
-#
-# c = 23.656767 
-# m = 2.297974
-# xplot = np.arange(m*roiLeft + c, m*roiRight + c, m*bins)
-# plt.plot(xData, yData, 'o', label='data')
-# plt.plot(xData, fitCurveNorm, label='GaussianNorm')
-# plt.legend()
-# plt.xlabel("Energy [kV]")
-# plt.ylabel("Count")
-# plt.title("Gamma emision spectrum")
-# plt.show()
